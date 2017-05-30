@@ -19,6 +19,10 @@ type Namespace interface {
 	Actuator(comment string, act ActCallback) Actuator
 	// Create an error handling node
 	Errors(comment string, errHandler ErrorCallback) ErrorNode
+	// Create an input endpoint operator
+	Input(comment string) Input
+	// Create an output endpoint operator
+	Output(comment string) Output
 }
 
 type namespaceType struct {
@@ -111,4 +115,36 @@ func (ns *namespaceType) Errors(comment string, errorHandler ErrorCallback) Erro
 	}
 
 	return errors
+}
+
+// Input create an input operator
+func (ns *namespaceType) Input(comment string) Input {
+	node := CreateNode(comment, ns.GetNamespace(), endpointProcessor{})
+
+	for k, v := range ns.GetMetadata() {
+		node.AddMeta(k, v)
+	}
+	node.SetType("endpoint.input")
+
+	input := Input{
+		Node: node,
+	}
+
+	return input
+}
+
+// Output create an output operator
+func (ns *namespaceType) Output(comment string) Output {
+	node := CreateNode(comment, ns.GetNamespace(), endpointProcessor{})
+
+	for k, v := range ns.GetMetadata() {
+		node.AddMeta(k, v)
+	}
+	node.SetType("endpoint.out")
+
+	output := Output{
+		Node: node,
+	}
+
+	return output
 }

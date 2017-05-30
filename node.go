@@ -56,6 +56,8 @@ type Node interface {
 	Do(comment string, act ActCallback) Actuator
 	Map(comment string, process ProcessCallback) Processor
 	Errors(comment string, errHandler ErrorCallback) ErrorNode
+	Input(comment string) Input
+	Output(comment string) Output
 }
 
 // node the node struct
@@ -360,6 +362,34 @@ func (n *node) Errors(comment string, errorHandler ErrorCallback) ErrorNode {
 	n.To(comment, errors)
 
 	return errors
+}
+
+func (n *node) Input(comment string) Input {
+	inputNode := CreateNode(comment, n.Namespace(), endpointProcessor{})
+
+	inputNode.SetType("endpoint.input")
+
+	input := Input{
+		Node: inputNode,
+	}
+
+	n.To(comment, input)
+
+	return input
+}
+
+func (n *node) Output(comment string) Output {
+	outputNode := CreateNode(comment, n.Namespace(), endpointProcessor{})
+
+	outputNode.SetType("endpoint.output")
+
+	output := Output{
+		Node: outputNode,
+	}
+
+	n.To(comment, output)
+
+	return output
 }
 
 /*
