@@ -188,10 +188,9 @@ func TestMultipleFlow(t *testing.T) {
 }
 
 func TestEndpoint(t *testing.T) {
-	devtoolAddon := CreateDevToolAddon("ws://localhost:7500/app")
-
-	Collar.Use(devtoolAddon)
-
+	// devtoolAddon := CreateDevToolAddon("ws://localhost:7500/app")
+	// Collar.Use(devtoolAddon)
+	//
 	ns := Collar.NS("com.collargo.test", map[string]string{})
 
 	input := ns.Input("input")

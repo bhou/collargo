@@ -19,10 +19,40 @@ type Addon interface {
 /**
  * dev addon
  */
+type elemData struct {
+	ID       string            `json:"id"`
+	Model    string            `json:"model"`
+	FullName string            `json:"fullName"`
+	Label    string            `json:"label"`
+	Inputs   map[string]string `json:"inputs"`
+	Outputs  map[string]string `json:"outputs"`
+	Stack    map[string]string `json:"stack"`
+	Meta     map[string]string `json:"meta"`
+	Tags     []string          `json:"tags,omitempty"`
+	Source   string            `json:"source"`
+	Target   string            `json:"target"`
+}
 
-type elementType map[string]interface{}
+type elemType struct {
+	Group   string            `json:"group"`
+	Data    elemData          `json:"data"`
+	Style   map[string]string `json:"style"`
+	Classes string            `json:"classes"`
+}
 
-type signalType map[string]interface{}
+type signalData struct {
+	ID string `json:"id"`
+}
+
+type signalType struct {
+	When    string                 `json:"when"`
+	Time    int64                  `json:"time"`
+	NodeId  string                 `json:"nodeId"`
+	Seq     string                 `json:"seq"`
+	Payload map[string]interface{} `json:"payload"`
+	Error   error                  `json:"error"`
+	End     bool                   `json:"end"`
+}
 
 func getStructType(myvar interface{}) string {
 	if t := reflect.TypeOf(myvar); t.Kind() == reflect.Ptr {
@@ -36,39 +66,34 @@ func getStructType(myvar interface{}) string {
  * Observer
  */
 
-func handleNode(node Node) map[string]interface{} {
-	ret := map[string]interface{}{}
-
-	ret["group"] = "nodes"
-	ret["data"] = map[string]interface{}{}
-	ret["style"] = map[string]string{}
-	ret["classses"] = ""
-
-	data := ret["data"].(map[string]interface{})
-	data["id"] = node.ID()
-	data["model"] = node.Type() // getStructType(node)
-	data["fullName"] = node.FullName()
-	data["label"] = node.Comment()
-	data["inputs"] = map[string]string{}
-	data["outputs"] = map[string]string{}
-	data["stack"] = map[string]string{}
-	data["meta"] = node.GetAllMeta()
-	data["tags"] = node.Tags()
-
-	return ret
+func handleNode(node Node) elemType {
+	return elemType{
+		Group:   "nodes",
+		Style:   map[string]string{},
+		Classes: "",
+		Data: elemData{
+			ID:       node.ID(),
+			Model:    node.Type(),
+			FullName: node.FullName(),
+			Label:    node.Comment(),
+			Inputs:   map[string]string{},
+			Outputs:  map[string]string{},
+			Stack:    map[string]string{},
+			Meta:     node.GetAllMeta(),
+			Tags:     node.Tags(),
+		},
+	}
 }
 
-func handleEdge(upstream Node, downstream Node) map[string]interface{} {
-	ret := map[string]interface{}{}
-
-	ret["group"] = "edges"
-	ret["data"] = map[string]interface{}{}
-
-	data := ret["data"].(map[string]interface{})
-	data["id"] = uuid.NewV4().String()
-	data["source"] = upstream.ID()
-	data["target"] = downstream.ID()
-	return ret
+func handleEdge(upstream Node, downstream Node) elemType {
+	return elemType{
+		Group: "edges",
+		Data: elemData{
+			ID:     uuid.NewV4().String(),
+			Source: upstream.ID(),
+			Target: downstream.ID(),
+		},
+	}
 }
 
 /**
@@ -78,7 +103,7 @@ func handleEdge(upstream Node, downstream Node) map[string]interface{} {
 // DevToolAddon the devtool addon
 type DevToolAddon struct {
 	observers []Observer
-	elements  []elementType
+	elements  []elemType
 	signals   []signalType
 
 	nodes map[string]Node
@@ -126,11 +151,6 @@ func (addon *DevToolAddon) Run() {
 				}
 			}
 		}
-
-		// for range ticker.C {
-		//  addon.pushBufferedElements()
-		//  addon.pushBufferedSignals()
-		// }
 	}()
 }
 
@@ -164,14 +184,14 @@ func (addon *DevToolAddon) signalFlowObserver(node Node, when string, s Signal, 
 		return nil
 	}
 
-	signalElem := map[string]interface{}{
-		"when":    when,
-		"time":    time.Now().UnixNano() / int64(time.Millisecond),
-		"nodeId":  node.ID(),
-		"seq":     s.ID,
-		"payload": s.Payload,
-		"error":   nil,
-		"end":     s.End,
+	signalElem := signalType{
+		When:    when,
+		Time:    time.Now().UnixNano() / int64(time.Millisecond),
+		NodeId:  node.ID(),
+		Seq:     s.ID,
+		Payload: s.Payload,
+		Error:   nil,
+		End:     s.End,
 	}
 
 	addon.signals = append(addon.signals, signalElem)
@@ -184,13 +204,13 @@ func (addon *DevToolAddon) pushBufferedElements() {
 		return
 	}
 
-	elemToBeSent := []elementType{}
+	elemToBeSent := []elemType{}
 
 	for i := range addon.elements {
 		elemToBeSent = append(elemToBeSent, addon.elements[i])
 	}
 
-	addon.elements = []elementType{}
+	addon.elements = []elemType{}
 
 	addon.client.Emit("append elements", map[string]interface{}{
 		"elements": elemToBeSent,
@@ -221,7 +241,7 @@ func CreateDevToolAddon(url string) Addon {
 
 	addon := DevToolAddon{
 		observers: []Observer{},
-		elements:  []elementType{},
+		elements:  []elemType{},
 		signals:   []signalType{},
 		client:    &client,
 		nodes:     map[string]Node{},
@@ -248,7 +268,7 @@ func CreateDevToolAddon(url string) Addon {
 			log.Println(node.Downstreams())
 			node.Push(payload)
 		} else {
-			log.Println("Failed to push data: couldn't  don't find node with id:", id)
+			log.Println("Failed to push data: couldn't find node with id:", id)
 		}
 
 		return nil

@@ -109,13 +109,16 @@ func (client *WebsocketClient) Emit(msg string, data interface{}) error {
 		ID:   client.clientID,
 		Data: data,
 	}
+
 	byteMsg, err := json.Marshal(m)
 	if err != nil {
 		log.Println("Emit:", "error when marshaling dev tool message", err)
 		return err
 	}
 
-	log.Println("emit message", string(byteMsg))
+	// marshaled, _ := json.MarshalIndent(m, "", " ")
+	// log.Println(string(marshaled))
+
 	err = client.conn.WriteMessage(websocket.TextMessage, byteMsg)
 	if err != nil {
 		log.Println("Emit:", "error when sending message to collar dev server", err)
