@@ -9,6 +9,41 @@ import (
 	"time"
 )
 
+/* Examples */
+
+func ExampleNamespace() {
+	// create a namespace
+	ns := Collar.NS("com.collargo.test", map[string]string{})
+
+	// create an input node
+	input := ns.Input("input")
+
+	// create a flow
+	// input -> x2 -> +1 -> test -> output
+	input.Map("x2", func(s Signal) (Signal, error) {
+		v := new(IntPayload)
+		s.GetValue(AnonPayload, v)
+		newS := s.New(v.Value * 2)
+		return newS, nil
+	}).Map("+1", func(s Signal) (Signal, error) {
+		v := new(IntPayload)
+		s.GetValue(AnonPayload, v)
+		newS := s.New(v.Value + 1)
+		return newS, nil
+	}).Do("test", func(s Signal) (interface{}, error) {
+		v := new(IntPayload)
+		s.GetValue(AnonPayload, v)
+		fmt.Println(v.Value)
+		return "", nil
+	}).Output("output")
+
+	// push a signal through input node
+	input.Push(10)
+
+	// Output:
+	// 21
+}
+
 func TestSensor(t *testing.T) {
 	sensor := Collar.Sensor("test sensor", func(options string, send SendDataFunc) {
 		time.Sleep(1000 * time.Millisecond)

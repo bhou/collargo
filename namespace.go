@@ -13,10 +13,21 @@ type Namespace interface {
 
 	// Create a sensor node
 	Sensor(comment string, watch SensorCallback, deferWatch bool) Sensor
+	// Filter a filter node
+	Filter(comment string, filter FilterCallback) Filter
+	// When an alias of Filter
+	When(comment string, filter FilterCallback) Filter
+
 	// Create a processor node
 	Processor(comment string, process ProcessCallback) Processor
+	// Alias of Processor
+	Map(comment string, process ProcessCallback) Processor
+
 	// Create an actuator node
 	Actuator(comment string, act ActCallback) Actuator
+	// Alias of Actuator
+	Do(comment string, act ActCallback) Actuator
+
 	// Create an error handling node
 	Errors(comment string, errHandler ErrorCallback) ErrorNode
 	// Create an input endpoint operator
@@ -63,6 +74,29 @@ func (ns *namespaceType) Sensor(comment string, watch SensorCallback, deferWatch
 	return sensor
 }
 
+// Filter create a filter operator
+func (ns *namespaceType) Filter(comment string, accept FilterCallback) Filter {
+	node := CreateNode(comment, ns.GetNamespace(), filterProcessor{
+		accept: accept,
+	})
+
+	for k, v := range ns.GetMetadata() {
+		node.AddMeta(k, v)
+	}
+	node.SetType("filter")
+
+	filterOp := Filter{
+		Node: node,
+	}
+
+	return filterOp
+}
+
+// When an alias of Filter
+func (ns *namespaceType) When(comment string, filter FilterCallback) Filter {
+	return ns.Filter(comment, filter)
+}
+
 // Processor create a processor operator
 func (ns *namespaceType) Processor(comment string, process ProcessCallback) Processor {
 	node := CreateNode(comment, ns.GetNamespace(), mapProcessor{
@@ -81,6 +115,11 @@ func (ns *namespaceType) Processor(comment string, process ProcessCallback) Proc
 	return processor
 }
 
+// Map alias of Processor
+func (ns *namespaceType) Map(comment string, process ProcessCallback) Processor {
+	return ns.Processor(comment, process)
+}
+
 // Actuator create an actuator operator
 func (ns *namespaceType) Actuator(comment string, act ActCallback) Actuator {
 	node := CreateNode(comment, ns.GetNamespace(), actProcessor{
@@ -97,6 +136,11 @@ func (ns *namespaceType) Actuator(comment string, act ActCallback) Actuator {
 	}
 
 	return actuator
+}
+
+// Map alias of Actuator
+func (ns *namespaceType) Do(comment string, act ActCallback) Actuator {
+	return ns.Actuator(comment, act)
 }
 
 // Errors create an error handler operator

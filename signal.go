@@ -2,8 +2,8 @@ package collargo
 
 import (
 	"encoding/json"
-
 	"github.com/satori/go.uuid"
+	// "log"
 	"reflect"
 )
 
@@ -88,16 +88,6 @@ func CreateSignal(data interface{}) Signal {
 	return s
 }
 
-// CreateSignalFromJSON Create a signal from json string, the payload is decoded as a map
-/*
-func CreateSignalFromJSON(jsonStr string) (Signal, error) {
-  newSignal := Signal{}
-  // general signal payload type (map and array)
-  err := json.Unmarshal([]byte(jsonStr), &newSignal)
-  return newSignal, err
-}
-*/
-
 // Clone the current signal
 func (s Signal) Clone() Signal {
 	return s.New(nil)
@@ -132,7 +122,7 @@ func (s Signal) New(data interface{}) Signal {
 	// copy payload if necessary, or get new payload from argument
 	var newPayload map[string]interface{}
 	if payload == nil {
-		newPayload := make(map[string]interface{})
+		newPayload = make(map[string]interface{})
 		// copy payload
 		for k, v := range s.Payload {
 			newPayload[k] = v

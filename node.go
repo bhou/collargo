@@ -52,31 +52,22 @@ type Node interface {
 	Observe(observer Observer) // Add an observer
 	Observers() []Observer     // Get All observers of this node
 
+	/* Flow related API */
+	GetFlowOutputObserver() (Observer, bool)         // get flow output observer
+	SetFlowOutputObserver(Observer)                  // set flow output observer
+	AddFlowFunc(outID string, flowFunc FlowFunc)     // attach a flow function to the node
+	GetFlowFunc(outID string) (FlowFunc, bool)       // get a flow function of the node
+	AddSignalCallback(sigID string, cb Callback)     // add signal processing callback
+	GetSignalCallback(sigID string) (Callback, bool) // get signal processing callback
+	DelSignalCallback(sigID string)                  // delete signal processing callback
+
 	// operators
 	Do(comment string, act ActCallback) Actuator
+	When(comment string, accept FilterCallback) Filter
 	Map(comment string, process ProcessCallback) Processor
 	Errors(comment string, errHandler ErrorCallback) ErrorNode
 	Input(comment string) Input
 	Output(comment string) Output
-}
-
-// node the node struct
-type node struct {
-	id        string
-	seq       string
-	comment   string
-	name      string
-	namespace string
-	nodeType  string
-
-	upstreams   map[string]Node
-	downstreams map[string]Node
-
-	tags []string
-	meta map[string]string
-
-	observers []Observer
-	processor SignalProcessor
 }
 
 // parseNameFromComment   In the node comment you can put a unique (unique in namespace) name with @ sign
@@ -122,6 +113,30 @@ func parseInfoFromComment(comment string) (name string, tags []string, newCommen
 	return name, tags, newComment
 }
 
+// node the node struct
+type node struct {
+	id        string
+	seq       string
+	comment   string
+	name      string
+	namespace string
+	nodeType  string
+
+	upstreams   map[string]Node
+	downstreams map[string]Node
+
+	tags []string
+	meta map[string]string
+
+	observers []Observer
+	processor SignalProcessor
+
+	// property used for flow function
+	flowOutputObserver Observer
+	flowFuncs          map[string]FlowFunc
+	signalCallbacks    map[string]Callback
+}
+
 // CreateNode create a node
 func CreateNode(
 	comment string, // comment text of the node
@@ -145,6 +160,10 @@ func CreateNode(
 	n.meta = map[string]string{
 		"namespace": namespace,
 	}
+
+	n.flowOutputObserver = nil
+	n.flowFuncs = map[string]FlowFunc{}
+	n.signalCallbacks = map[string]Callback{}
 
 	return n
 }
@@ -312,9 +331,60 @@ func (n *node) Observers() []Observer {
 	return n.observers
 }
 
+func (n *node) GetFlowOutputObserver() (Observer, bool) {
+	if n.flowOutputObserver == nil {
+		return nil, false
+	}
+	return n.flowOutputObserver, true
+}
+
+func (n *node) SetFlowOutputObserver(observer Observer) {
+	n.flowOutputObserver = observer
+}
+
+func (n *node) AddFlowFunc(outID string, flowFunc FlowFunc) {
+	n.flowFuncs[outID] = flowFunc
+}
+
+func (n *node) GetFlowFunc(outID string) (FlowFunc, bool) {
+	flowFunc, existed := n.flowFuncs[outID]
+	return flowFunc, existed
+}
+
+func (n *node) AddSignalCallback(sigID string, cb Callback) {
+	n.signalCallbacks[sigID] = cb
+}
+
+func (n *node) GetSignalCallback(sigID string) (Callback, bool) {
+	cb, existed := n.signalCallbacks[sigID]
+	return cb, existed
+}
+
+func (n *node) DelSignalCallback(sigID string) {
+	if _, existed := n.GetSignalCallback(sigID); existed {
+		delete(n.signalCallbacks, sigID)
+	}
+}
+
 /*
  Operators
 */
+
+func (n *node) When(comment string, accept FilterCallback) Filter {
+	filterNode := CreateNode(comment, n.Namespace(), filterProcessor{
+		accept: accept,
+	})
+
+	filterNode.SetType("filter")
+
+	filter := Filter{
+		Node: filterNode,
+	}
+
+	n.To(comment, filter)
+
+	return filter
+}
 
 func (n *node) Map(comment string, process ProcessCallback) Processor {
 	mapNode := CreateNode(comment, n.Namespace(), mapProcessor{

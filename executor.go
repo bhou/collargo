@@ -1,7 +1,9 @@
 package collargo
 
+// Executable the executable function type
 type Executable func(s Signal, send SendSignalFunc) error
 
+// Executor the executor interface
 type Executor interface {
 	// Schedule an executable with a given signal and send function
 	Schedule(executable Executable, node Node, s Signal)

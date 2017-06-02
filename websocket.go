@@ -52,13 +52,13 @@ func (client *WebsocketClient) Connect() error {
 				return
 			}
 
-			log.Println("receive message", string(message))
+			// log.Println("receive message", string(message))
 
 			var receivedMsg Message
 
 			err = json.Unmarshal(message, &receivedMsg)
 
-			log.Println("received message", receivedMsg)
+			// log.Println("received message", receivedMsg)
 			if err != nil {
 				log.Println("Failed to unmarshal received message", err)
 				continue

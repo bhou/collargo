@@ -251,7 +251,6 @@ func CreateDevToolAddon(url string) Addon {
 	addon.observers = append(addon.observers, addon.signalFlowObserver)
 
 	client.On("push", func(data interface{}) error {
-		log.Println("dev addon push", data)
 		mapData := data.(map[string]interface{})
 		nodeId, ok := mapData["nodeId"]
 
@@ -275,7 +274,6 @@ func CreateDevToolAddon(url string) Addon {
 	})
 
 	client.On("send", func(data interface{}) error {
-		log.Println("dev addon send", data)
 		mapData := data.(map[string]interface{})
 		nodeId, ok := mapData["nodeId"]
 

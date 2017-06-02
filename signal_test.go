@@ -259,6 +259,8 @@ func TestManipulateTag(t *testing.T) {
 	tag2, existed := s2.GetTag("tag2")
 	assert.True(t, existed)
 	assert.Equal(t, "value2", tag2)
+	payload1, existed := s2.Get("payload1")
+	assert.Equal(t, "payloadValue1", payload1.(string))
 
 	// remove the tag
 	s3 := s2.DelTag("tag1")
