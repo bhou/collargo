@@ -40,3 +40,30 @@ func TestIntPayload(t *testing.T) {
 	input.Push(10)
 	time.Sleep(3000 * time.Millisecond)
 }
+
+func TestIntPayloadFromString(t *testing.T) {
+	str := "123"
+	v := new(IntPayload)
+	v.Convert(str)
+
+	assert.Equal(t, 123, v.Value)
+}
+
+func TestFloatPayload(t *testing.T) {
+	i := 123
+	f := 123.0
+	s := "123"
+
+	v1 := new(Float64Payload)
+	v1.Convert(i)
+	assert.Equal(t, float64(123), v1.Value)
+
+	v2 := new(Float64Payload)
+	v2.Convert(f)
+	assert.Equal(t, float64(123), v2.Value)
+
+	v3 := new(Float64Payload)
+	v3.Convert(s)
+	assert.Equal(t, float64(123), v3.Value)
+
+}

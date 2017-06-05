@@ -3,7 +3,7 @@ package collargo
 import (
 	"github.com/satori/go.uuid"
 	"log"
-	"reflect"
+	// "reflect"
 	"sync"
 	"time"
 )
@@ -55,13 +55,13 @@ type signalType struct {
 	End     bool                   `json:"end"`
 }
 
-func getStructType(myvar interface{}) string {
-	if t := reflect.TypeOf(myvar); t.Kind() == reflect.Ptr {
-		return "*" + t.Elem().Name()
-	} else {
-		return t.Name()
-	}
-}
+// func getStructType(myvar interface{}) string {
+//  if t := reflect.TypeOf(myvar); t.Kind() == reflect.Ptr {
+//    return "*" + t.Elem().Name()
+//  } else {
+//    return t.Name()
+//  }
+// }
 
 /**
  * Observer

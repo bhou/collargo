@@ -16,7 +16,7 @@ type sensorProcessor struct {
 }
 
 func (processor sensorProcessor) OnError(s Signal, send SendSignalFunc) error {
-	send(s)
+	// send(s)
 	return nil
 }
 

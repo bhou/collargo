@@ -32,15 +32,9 @@ func TestToFlowFunc(t *testing.T) {
 
 	flowFunc := Collar.ToFlowFunc(input, output)
 
-	result, err := flowFunc(10)
-	r := result.(map[string]interface{})
+	r, err := flowFunc(10)
 	v, _ := r["__anon__"]
 	assert.Nil(t, err)
 	assert.Equal(t, 21, v.(int))
 	fmt.Println("assert", v)
-	// flowFunc(10, func(err error, result interface{}) {
-	//  r := result.(map[string]interface{})
-	//  v, _ := r["__anon__"]
-	//  assert.Equal(t, 21, v.(int))
-	// })
 }

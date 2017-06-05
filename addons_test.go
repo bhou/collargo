@@ -2,16 +2,17 @@ package collargo
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"runtime/debug"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDevToolAddon(t *testing.T) {
-	// devtoolAddon := CreateDevToolAddon("ws://localhost:7500/app")
-	// Collar.Use(devtoolAddon)
+	devtoolAddon := CreateDevToolAddon("ws://localhost:7500/app")
+	Collar.Use(devtoolAddon)
 
 	ns := Collar.NS("com.collargo.test", map[string]string{
 		"module": "test",
@@ -66,9 +67,9 @@ func TestDevToolAddon(t *testing.T) {
 		return "", nil
 	})
 
-	assert.True(t, true)
-
 	time.Sleep(3000 * time.Millisecond)
+
+	devtoolAddon.Stop()
 }
 
 func TestPrintStackTrace(t *testing.T) {
@@ -83,4 +84,30 @@ func TestPrintStackTrace(t *testing.T) {
 	}
 
 	assert.True(t, true)
+}
+
+func TestHandleNodeAndEdge(t *testing.T) {
+	ns := Collar.NS("com.collargo.test", map[string]string{
+		"module": "test",
+	})
+
+	n1 := ns.Map("@passthrough processor test", func(s Signal) (Signal, error) {
+		return s, nil
+	})
+
+	n2 := ns.Do("@print print", func(s Signal) (interface{}, error) {
+		fmt.Println(s.Payload)
+		return nil, nil
+	})
+
+	elem := handleNode(n1)
+	edge := handleEdge(n1, n2)
+
+	assert.Equal(t, "processor", elem.Data.Model)
+	assert.Equal(t, "processor test", elem.Data.Label)
+	assert.Equal(t, "com.collargo.test.passthrough", elem.Data.FullName)
+	assert.Equal(t, "", elem.Classes)
+
+	assert.Equal(t, n1.ID(), edge.Data.Source)
+	assert.Equal(t, n2.ID(), edge.Data.Target)
 }

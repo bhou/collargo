@@ -15,7 +15,7 @@ type collarType struct {
 
 type callbackResult struct {
 	err    error
-	result interface{}
+	result map[string]interface{}
 }
 
 // SetExecutor set the executor
@@ -86,12 +86,12 @@ func (collar *collarType) ToFlowFunc(input Node, output Node) FlowFunc {
 		return flowFunc
 	}
 
-	flowFunc = func(data interface{}) (interface{}, error) {
+	flowFunc = func(data interface{}) (Payload, error) {
 		signal := CreateSignal(data)
 		signal = signal.SetTag("__to_node_dest__", output.ID())
 
 		ch := make(chan callbackResult)
-		output.AddSignalCallback(signal.ID, func(err error, result interface{}) {
+		output.AddSignalCallback(signal.ID, func(err error, result Payload) {
 			if err != nil {
 				ch <- callbackResult{
 					err: err,

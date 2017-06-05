@@ -3,6 +3,7 @@ package collargo
 /**
  * Public types
  */
+type Payload map[string]interface{}
 
 // SendSignalFunc the function type used to send a signal type data
 type SendSignalFunc func(Signal)
@@ -11,10 +12,10 @@ type SendSignalFunc func(Signal)
 type SendDataFunc func(interface{})
 
 // FlowFunc the function converted from a flow
-type FlowFunc func(data interface{}) (interface{}, error)
+type FlowFunc func(data interface{}) (Payload, error)
 
 // Callback the callback function
-type Callback func(err error, data interface{})
+type Callback func(err error, data Payload)
 
 /**
  * Private types
