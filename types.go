@@ -11,10 +11,10 @@ type SendSignalFunc func(Signal)
 type SendDataFunc func(interface{})
 
 // FlowFunc the function converted from a flow
-type FlowFunc func(data interface{}, done Callback)
+type FlowFunc func(data interface{}) (interface{}, error)
 
-// Callback the nodejs style callback type
-type Callback func(error, interface{})
+// Callback the callback function
+type Callback func(err error, data interface{})
 
 /**
  * Private types

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
+	// "time"
 )
 
 func TestToFlowFunc(t *testing.T) {
@@ -32,11 +32,15 @@ func TestToFlowFunc(t *testing.T) {
 
 	flowFunc := Collar.ToFlowFunc(input, output)
 
-	flowFunc(10, func(err error, result interface{}) {
-		r := result.(map[string]interface{})
-		v, _ := r["__anon__"]
-		assert.Equal(t, 21, v.(int))
-	})
-
-	time.Sleep(3000 * time.Millisecond)
+	result, err := flowFunc(10)
+	r := result.(map[string]interface{})
+	v, _ := r["__anon__"]
+	assert.Nil(t, err)
+	assert.Equal(t, 21, v.(int))
+	fmt.Println("assert", v)
+	// flowFunc(10, func(err error, result interface{}) {
+	//  r := result.(map[string]interface{})
+	//  v, _ := r["__anon__"]
+	//  assert.Equal(t, 21, v.(int))
+	// })
 }

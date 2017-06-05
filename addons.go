@@ -4,6 +4,7 @@ import (
 	"github.com/satori/go.uuid"
 	"log"
 	"reflect"
+	"sync"
 	"time"
 )
 
@@ -102,6 +103,7 @@ func handleEdge(upstream Node, downstream Node) elemType {
 
 // DevToolAddon the devtool addon
 type DevToolAddon struct {
+	sync.RWMutex
 	observers []Observer
 	elements  []elemType
 	signals   []signalType
@@ -141,8 +143,10 @@ func (addon *DevToolAddon) Run() {
 		for {
 			select {
 			case _ = <-ticker.C:
+				addon.Lock()
 				addon.pushBufferedElements()
 				addon.pushBufferedSignals()
+				addon.Unlock()
 
 			case c := <-addon.command:
 				switch c {
@@ -159,6 +163,7 @@ func (addon *DevToolAddon) staticTopologyObserver(node Node, when string, s Sign
 		return nil
 	}
 
+	addon.Lock()
 	downstream := data[0].(Node)
 
 	// add nodes to elements list
@@ -175,6 +180,7 @@ func (addon *DevToolAddon) staticTopologyObserver(node Node, when string, s Sign
 
 	// handle edges
 	addon.elements = append(addon.elements, handleEdge(node, downstream))
+	addon.Unlock()
 
 	return nil
 }
@@ -194,7 +200,9 @@ func (addon *DevToolAddon) signalFlowObserver(node Node, when string, s Signal, 
 		End:     s.End,
 	}
 
+	addon.Lock()
 	addon.signals = append(addon.signals, signalElem)
+	addon.Unlock()
 
 	return nil
 }
@@ -209,7 +217,6 @@ func (addon *DevToolAddon) pushBufferedElements() {
 	for i := range addon.elements {
 		elemToBeSent = append(elemToBeSent, addon.elements[i])
 	}
-
 	addon.elements = []elemType{}
 
 	addon.client.Emit("append elements", map[string]interface{}{

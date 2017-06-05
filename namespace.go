@@ -184,7 +184,7 @@ func (ns *namespaceType) Output(comment string) Output {
 	for k, v := range ns.GetMetadata() {
 		node.AddMeta(k, v)
 	}
-	node.SetType("endpoint.out")
+	node.SetType("endpoint.output")
 
 	output := Output{
 		Node: node,

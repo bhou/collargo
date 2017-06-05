@@ -3,6 +3,7 @@ package collargo
 import (
 	"github.com/satori/go.uuid"
 	"regexp"
+	"sync"
 )
 
 // Observer function: observe signal processing
@@ -115,6 +116,7 @@ func parseInfoFromComment(comment string) (name string, tags []string, newCommen
 
 // node the node struct
 type node struct {
+	sync.RWMutex
 	id        string
 	seq       string
 	comment   string
@@ -332,37 +334,53 @@ func (n *node) Observers() []Observer {
 }
 
 func (n *node) GetFlowOutputObserver() (Observer, bool) {
+	// n.RLock()
 	if n.flowOutputObserver == nil {
 		return nil, false
 	}
-	return n.flowOutputObserver, true
+	observer := n.flowOutputObserver
+	// n.RUnlock()
+	return observer, true
 }
 
 func (n *node) SetFlowOutputObserver(observer Observer) {
+	n.Lock()
 	n.flowOutputObserver = observer
+	n.Unlock()
 }
 
 func (n *node) AddFlowFunc(outID string, flowFunc FlowFunc) {
+	n.Lock()
 	n.flowFuncs[outID] = flowFunc
+	n.Unlock()
 }
 
 func (n *node) GetFlowFunc(outID string) (FlowFunc, bool) {
+	// n.RLock()
 	flowFunc, existed := n.flowFuncs[outID]
+	// n.RUnlock()
 	return flowFunc, existed
 }
 
 func (n *node) AddSignalCallback(sigID string, cb Callback) {
+	n.Lock()
 	n.signalCallbacks[sigID] = cb
+	n.Unlock()
 }
 
 func (n *node) GetSignalCallback(sigID string) (Callback, bool) {
+	n.RLock()
 	cb, existed := n.signalCallbacks[sigID]
+	n.RUnlock()
 	return cb, existed
 }
 
 func (n *node) DelSignalCallback(sigID string) {
-	if _, existed := n.GetSignalCallback(sigID); existed {
+	_, existed := n.GetSignalCallback(sigID)
+	if existed {
+		n.Lock()
 		delete(n.signalCallbacks, sigID)
+		n.Unlock()
 	}
 }
 

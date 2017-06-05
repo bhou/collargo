@@ -40,6 +40,8 @@ func ExampleNamespace() {
 	// push a signal through input node
 	input.Push(10)
 
+	time.Sleep(3000 * time.Millisecond)
+
 	// Output:
 	// 21
 }
