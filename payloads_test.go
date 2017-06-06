@@ -38,7 +38,7 @@ func TestIntPayload(t *testing.T) {
 	}).Output("output")
 
 	input.Push(10)
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestIntPayloadFromString(t *testing.T) {

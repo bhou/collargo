@@ -47,7 +47,7 @@ func TestFilter(t *testing.T) {
 
 	input.Push(10)
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestErrorInFilter(t *testing.T) {
@@ -75,7 +75,7 @@ func TestErrorInFilter(t *testing.T) {
 
 	input.Push(11)
 
-	time.Sleep(2000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestFilterErrorSignal(t *testing.T) {
@@ -115,7 +115,7 @@ func TestFilterErrorSignal(t *testing.T) {
 
 	errorGen.Push(11)
 
-	time.Sleep(2000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 
 }
 
@@ -146,6 +146,6 @@ func TestFilterErrorSignalWithActuator(t *testing.T) {
 
 	input.Push(11)
 
-	time.Sleep(2000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 
 }

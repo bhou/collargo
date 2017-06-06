@@ -1,7 +1,8 @@
 package collargo
 
 import (
-// "log"
+	// "log"
+	"time"
 )
 
 // CollarType the top level collar type
@@ -130,4 +131,7 @@ var (
 		observers: []Observer{},
 		executor:  defaultExecutor{},
 	}
+
+	// For Test
+	testDelay = time.Duration(500)
 )

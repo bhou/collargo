@@ -29,7 +29,7 @@ func TestSensorInputSignal(t *testing.T) {
 	input.Push(2)
 	assert.True(t, true)
 
-	time.Sleep(2000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestSensorInputError(t *testing.T) {
@@ -60,5 +60,5 @@ func TestSensorInputError(t *testing.T) {
 	input.Push(2)
 	assert.True(t, true)
 
-	time.Sleep(2000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }

@@ -40,7 +40,7 @@ func ExampleNamespace() {
 	// push a signal through input node
 	input.Push(10)
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 
 	// Output:
 	// 21
@@ -66,7 +66,7 @@ func TestSensor(t *testing.T) {
 	sensor.To("node1", node1)
 	fmt.Println("ready")
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestSensorWithDeferWatch(t *testing.T) {
@@ -90,7 +90,7 @@ func TestSensorWithDeferWatch(t *testing.T) {
 
 	sensor.Watch("initiated")
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestProcessor(t *testing.T) {
@@ -118,7 +118,7 @@ func TestProcessor(t *testing.T) {
 		return s, nil
 	})
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestActuator(t *testing.T) {
@@ -153,7 +153,7 @@ func TestActuator(t *testing.T) {
 		return "", nil
 	})
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestErrors(t *testing.T) {
@@ -174,7 +174,7 @@ func TestErrors(t *testing.T) {
 		return nil
 	})
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestMultipleFlow(t *testing.T) {
@@ -221,7 +221,7 @@ func TestMultipleFlow(t *testing.T) {
 		return "", nil
 	})
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
 
 func TestEndpoint(t *testing.T) {
@@ -252,5 +252,5 @@ func TestEndpoint(t *testing.T) {
 	}).Output("output")
 
 	input.Push(10)
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }

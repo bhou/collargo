@@ -45,31 +45,34 @@ func TestDevToolAddon(t *testing.T) {
 		return "", nil
 	})
 
-	sensor.Map("x3", func(s Signal) (Signal, error) {
-		fmt.Println("step 2.1", "x3", s.Payload)
-		v := new(IntPayload)
-		s.GetValue(AnonPayload, v)
-		newS := s.New(v.Value * 3)
-		fmt.Println("step 2.2", newS.Payload)
-		return newS, nil
-	}).Map("+1", func(s Signal) (Signal, error) {
-		fmt.Println("step 2.3", "+1", s.Payload)
-		v := new(IntPayload)
-		s.GetValue(AnonPayload, v)
-		newS := s.New(v.Value + 1)
-		fmt.Println("step 2.4", newS.Payload)
-		return newS, nil
-	}).Do("test", func(s Signal) (interface{}, error) {
-		v := new(IntPayload)
-		s.GetValue(AnonPayload, v)
-		fmt.Println("step 2.5", v.Value)
-		assert.Equal(t, 31, v.Value)
-		return "", nil
-	})
+	sensor.
+		Map("x3", func(s Signal) (Signal, error) {
+			fmt.Println("step 2.1", "x3", s.Payload)
+			v := new(IntPayload)
+			s.GetValue(AnonPayload, v)
+			newS := s.New(v.Value * 3)
+			fmt.Println("step 2.2", newS.Payload)
+			return newS, nil
+		}).
+		Map("+1", func(s Signal) (Signal, error) {
+			fmt.Println("step 2.3", "+1", s.Payload)
+			v := new(IntPayload)
+			s.GetValue(AnonPayload, v)
+			newS := s.New(v.Value + 1)
+			fmt.Println("step 2.4", newS.Payload)
+			return newS, nil
+		}).
+		Do("test", func(s Signal) (interface{}, error) {
+			v := new(IntPayload)
+			s.GetValue(AnonPayload, v)
+			fmt.Println("step 2.5", v.Value)
+			assert.Equal(t, 31, v.Value)
+			return "", nil
+		})
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 
-	devtoolAddon.Stop()
+	// devtoolAddon.Stop()
 }
 
 func TestPrintStackTrace(t *testing.T) {

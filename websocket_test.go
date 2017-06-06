@@ -20,5 +20,5 @@ func TestWebsocketClient(t *testing.T) {
 
 	assert.True(t, true)
 
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(testDelay * time.Millisecond)
 }
