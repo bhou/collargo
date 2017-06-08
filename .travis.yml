@@ -8,6 +8,8 @@ node_js:
   - "node"
 
 before_install:
+  - npm install -g n
+  - n 6.5.0
   - npm install collar-dev-server
 
 script:
