@@ -72,7 +72,7 @@ func TestDevToolAddon(t *testing.T) {
 
 	time.Sleep(testDelay * time.Millisecond)
 
-	// devtoolAddon.Stop()
+	devtoolAddon.Stop()
 }
 
 func TestPrintStackTrace(t *testing.T) {

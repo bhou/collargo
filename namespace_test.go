@@ -71,7 +71,7 @@ func TestSensor(t *testing.T) {
 
 func TestSensorWithDeferWatch(t *testing.T) {
 	sensor := Collar.Sensor("test sensor", func(options string, send SendDataFunc) {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		send("text message")
 	}, true)
 
@@ -95,7 +95,7 @@ func TestSensorWithDeferWatch(t *testing.T) {
 
 func TestProcessor(t *testing.T) {
 	sensor := Collar.Sensor("test sensor", func(options string, send SendDataFunc) {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		send(10)
 	}, false)
 
@@ -123,7 +123,7 @@ func TestProcessor(t *testing.T) {
 
 func TestActuator(t *testing.T) {
 	sensor := Collar.Sensor("test sensor", func(options string, send SendDataFunc) {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		send(10)
 	}, false)
 
@@ -158,7 +158,7 @@ func TestActuator(t *testing.T) {
 
 func TestErrors(t *testing.T) {
 	sensor := Collar.Sensor("test sensor", func(options string, send SendDataFunc) {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		send(10)
 	}, false)
 
@@ -179,7 +179,7 @@ func TestErrors(t *testing.T) {
 
 func TestMultipleFlow(t *testing.T) {
 	sensor := Collar.Sensor("test sensor", func(options string, send SendDataFunc) {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		send(10)
 	}, false)
 
@@ -252,5 +252,83 @@ func TestEndpoint(t *testing.T) {
 	}).Output("output")
 
 	input.Push(10)
+	time.Sleep(testDelay * time.Millisecond)
+}
+
+func TestNodeConnection(t *testing.T) {
+	ns := Collar.NS("com.collargo.test", map[string]string{})
+
+	sensor := ns.Sensor("test sensor", func(options string, send SendDataFunc) {
+		time.Sleep(100 * time.Millisecond)
+		send(11)
+		time.Sleep(100 * time.Millisecond)
+		send(10)
+	}, false)
+
+	errGen := ns.Do("error generator", func(s Signal) (interface{}, error) {
+		v := new(IntPayload)
+		s.GetValue("__anon__", v)
+		if v.Value%2 != 0 {
+			return nil, errors.New("error")
+		} else {
+			return nil, nil
+		}
+	})
+
+	filter := ns.Filter("even", func(s Signal) (bool, error) {
+		v := new(IntPayload)
+		s.GetValue("__anon__", v)
+		return v.Value%2 == 0, nil
+	})
+
+	double := ns.Map("x2", func(s Signal) (Signal, error) {
+		fmt.Println("step 1", "x2", s.Payload)
+		v, _ := s.Get(AnonPayload)
+		newS := s.New(v.(int) * 2)
+		fmt.Println("step 2", newS.Payload)
+		return newS, nil
+	})
+
+	inc := ns.Map("+1", func(s Signal) (Signal, error) {
+		fmt.Println("step 3", "+1", s.Payload)
+		v, _ := s.Get(AnonPayload)
+		newS := s.New(v.(int) + 1)
+		fmt.Println("step 4", newS.Payload)
+		return newS, nil
+	})
+
+	greeting := ns.Do("greeting", func(s Signal) (interface{}, error) {
+		fmt.Println("step 5", "greeting", s.Payload)
+		v, _ := s.Get(AnonPayload)
+		fmt.Println("step 6")
+		return "Hello! " + strconv.Itoa(v.(int)), nil
+	})
+
+	testGreeting := ns.Do("test", func(s Signal) (interface{}, error) {
+		v, _ := s.Get(AnonPayload)
+		greeting, _ := s.GetResult()
+		if v.(int) == 11 {
+			return "", nil
+		}
+		fmt.Println("step 7", s.Payload)
+		assert.Equal(t, 21, v.(int))
+		assert.Equal(t, greeting, "Hello! 21")
+		return "", nil
+	})
+
+	errorHandling := ns.Errors("error handler", func(s Signal, rethrow SendSignalFunc) error {
+		rethrow(s)
+		return nil
+	})
+
+	sensor.
+		To("error gen", errGen).
+		To("even number", filter).
+		To("x2", double).
+		To("+1", inc).
+		To("greeting", greeting).
+		To("error", errorHandling).
+		To("test", testGreeting)
+
 	time.Sleep(testDelay * time.Millisecond)
 }

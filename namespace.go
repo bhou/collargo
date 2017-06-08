@@ -146,7 +146,17 @@ func (ns *namespaceType) Do(comment string, act ActCallback) Actuator {
 // Errors create an error handler operator
 func (ns *namespaceType) Errors(comment string, errorHandler ErrorCallback) ErrorNode {
 	node := CreateNode(comment, ns.GetNamespace(), errorProcessor{
-		errorHandler: errorHandler,
+		errorHandler: func(s Signal, rethrow SendSignalFunc) error {
+			return errorHandler(s, func(signal Signal) {
+				var signalWithoutError Signal
+				if signal.Error != nil {
+					signalWithoutError = signal.SetError(nil)
+				} else {
+					signalWithoutError = signal
+				}
+				rethrow(signalWithoutError)
+			})
+		},
 	})
 
 	for k, v := range ns.GetMetadata() {

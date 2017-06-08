@@ -138,7 +138,7 @@ func (s Signal) New(data interface{}) Signal {
 	newSignal := Signal{
 		ID:      s.ID,
 		Seq:     s.Seq,
-		Error:   err,
+		Error:   nil,
 		End:     s.End,
 		Payload: newPayload,
 		Tags:    copiedTag,
