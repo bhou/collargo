@@ -13,7 +13,7 @@ before_install:
   - npm install collar-dev-server
 
 script:
-  - collar-dev-server
+  - collar-dev-server &
   - go test -cover
 
 notifications:
