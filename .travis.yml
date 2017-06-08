@@ -8,8 +8,8 @@ node_js:
   - "node"
 
 before_install:
-  - npm install -g n
-  - n 6.5.0
+  - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+  - nvm install 6
   - npm install collar-dev-server
 
 script:
