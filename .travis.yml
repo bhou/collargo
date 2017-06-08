@@ -1,0 +1,13 @@
+language: go
+
+go:
+  - 1.6
+  - 1.7
+  - 1.8
+
+before_install:
+  - npm install collar-dev-server
+
+script:
+  - collar-dev-server
+  - go test -cover
