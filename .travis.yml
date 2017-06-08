@@ -1,12 +1,11 @@
 language: go
 
 go:
-  - 1.6
-  - 1.7
   - 1.8
 
 node_js:
-  - 6.5.0
+  - "6"
+  - "node"
 
 before_install:
   - npm install collar-dev-server
@@ -14,3 +13,10 @@ before_install:
 script:
   - collar-dev-server
   - go test -cover
+
+notifications:
+  email:
+    recipients:
+      - daily.bhou@gmail.com
+    on_success: change
+    on_failure: always
